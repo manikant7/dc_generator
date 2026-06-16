@@ -1,0 +1,6 @@
+product_id,name,category,price,in_stock,rating,description
+P001,Wireless Mouse,Electronics,29.99,true,4.5,Ergonomic wireless mouse with USB receiver
+P002,USB-C Hub,Electronics,49.99,true,4.2,7-in-1 USB-C hub with HDMI
+P003,Notebook,Stationery,3.99,true,4.8,Pack of 3 lined notebooks
+P004,Desk Lamp,Lighting,34.99,false,3.9,LED desk lamp with adjustable arm
+P005,Coffee Mug,Kitchen,12.99,true,4.6,Ceramic mug 350ml

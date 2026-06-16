@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Contract Generator</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --surface: #1a1f2e;
+    --surface2: #242b3d;
+    --border: #2d3548;
+    --text: #e1e4e8;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-hover: #79b8ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --code-bg: #0d1117;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--accent);
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 8px 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .input-row input[type="text"] {
+    flex: 1;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-row input[type="text"]:focus { border-color: var(--accent); }
+  .input-row input[type="file"] {
+    flex: 1;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    padding: 8px 0;
+  }
+  .input-row input[type="file"]::file-selector-button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 6px 12px;
+    margin-right: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .input-row input[type="file"]::file-selector-button:hover {
+    background: var(--border);
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .output-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 768px) {
+    .output-grid { grid-template-columns: 1fr; }
+    .output-grid .card:last-child { margin-bottom: 0; }
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .panel-header h2 { margin: 0; }
+
+  .btn-sm {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background 0.15s;
+  }
+  .btn-sm:hover { background: var(--border); }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    max-height: 500px;
+    overflow-y: auto;
+    color: var(--text);
+    tab-size: 4;
+  }
+  .keyword { color: #ff7b72; }
+  .type { color: #79c0ff; }
+  .string { color: #a5d6ff; }
+  .comment { color: #8b949e; }
+  .func { color: #d2a8ff; }
+
+  .chip {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .chip strong { color: var(--text); }
+
+  .error-msg {
+    background: rgba(248,81,73,0.1);
+    border: 1px solid var(--red);
+    color: var(--red);
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    display: none;
+    font-size: 0.9rem;
+  }
+  .error-msg.visible { display: block; }
+
+  .hidden { display: none; }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Data Contract Generator</h1>
+  <p class="subtitle">Upload or provide a path to JSON, XML, or CSV &rarr; get Pydantic v2 models + pytest tests</p>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="card">
+    <h2>Input</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="path">File Path</button>
+      <button class="tab-btn" data-tab="upload">Upload</button>
+    </div>
+
+    <div class="tab-content active" id="tab-path">
+      <div class="input-row">
+        <input type="text" id="file-path" placeholder="/path/to/data.json" spellcheck="false" />
+        <button class="btn" id="generate-btn">Generate</button>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-upload">
+      <div class="input-row">
+        <input type="file" id="file-upload" />
+        <button class="btn" id="upload-btn">Upload &amp; Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stats" class="hidden">
+    <div class="chip" id="stats-content"></div>
+  </div>
+
+  <div id="output" class="hidden">
+    <div class="output-grid">
+      <div class="card">
+        <div class="panel-header">
+          <h2>Contract <span class="badge">.py</span></h2>
+          <div>
+            <button class="btn-sm" id="copy-contract">Copy</button>
+            <button class="btn-sm" id="download-contract">Download</button>
+          </div>
+        </div>
+        <pre id="contract-code"></pre>
+      </div>
+      <div class="card">
+        <div class="panel-header">
+          <h2>Tests <span class="badge">.py</span></h2>
+          <div>
+            <button class="btn-sm" id="copy-tests">Copy</button>
+            <button class="btn-sm" id="download-tests">Download</button>
+          </div>
+        </div>
+        <pre id="test-code"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const state = { contractFilename: '', testFilename: '' };
+
+  function $(id) { return document.getElementById(id); }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      $(`tab-${btn.dataset.tab}`).classList.add('active');
+    });
+  });
+
+  function showError(msg) {
+    const el = $('error-msg');
+    el.textContent = msg;
+    el.classList.add('visible');
+    $('output').classList.add('hidden');
+    $('stats').classList.add('hidden');
+  }
+
+  function clearError() {
+    $('error-msg').classList.remove('visible');
+  }
+
+  function setLoading(loading) {
+    ['generate-btn', 'upload-btn'].forEach(id => {
+      const btn = $(id);
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Generating...';
+      } else {
+        btn.disabled = false;
+        btn.textContent = id === 'generate-btn' ? 'Generate' : 'Upload & Generate';
+      }
+    });
+  }
+
+  async function handleGenerate(filePath, file) {
+    clearError();
+    setLoading(true);
+    $('output').classList.add('hidden');
+    $('stats').classList.add('hidden');
+
+    const formData = new FormData();
+    if (file) {
+      formData.append('file', file);
+    } else {
+      formData.append('file_path', filePath);
+    }
+
+    try {
+      const resp = await fetch('/generate', { method: 'POST', body: formData });
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        showError(data.detail || 'Unknown error');
+        return;
+      }
+
+      state.contractFilename = data.contract_filename;
+      state.testFilename = data.test_filename;
+
+      $('contract-code').textContent = data.contract_code;
+      $('test-code').textContent = data.test_code;
+      $('stats-content').innerHTML =
+        `<strong>${data.class_name}</strong> &middot; ${data.file_type.toUpperCase()} &middot; ${data.record_count} records &middot; ` +
+        `<a href="/download/${data.contract_filename}" style="color:var(--accent)">contract</a> &middot; ` +
+        `<a href="/download/${data.test_filename}" style="color:var(--accent)">tests</a>`;
+      $('stats').classList.remove('hidden');
+      $('output').classList.remove('hidden');
+    } catch (err) {
+      showError('Network error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  $('generate-btn').addEventListener('click', () => {
+    const path = $('file-path').value.trim();
+    if (!path) { showError('Please enter a file path'); return; }
+    handleGenerate(path, null);
+  });
+
+  $('file-path').addEventListener('keydown', e => {
+    if (e.key === 'Enter') $('generate-btn').click();
+  });
+
+  $('upload-btn').addEventListener('click', () => {
+    const file = $('file-upload').files[0];
+    if (!file) { showError('Please select a file to upload'); return; }
+    handleGenerate('', file);
+  });
+
+  function setupCopy(btnId, codeId) {
+    $(btnId).addEventListener('click', () => {
+      const text = $(codeId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = $(btnId).textContent;
+        $(btnId).textContent = 'Copied!';
+        setTimeout(() => { $(btnId).textContent = orig; }, 1500);
+      });
+    });
+  }
+  setupCopy('copy-contract', 'contract-code');
+  setupCopy('copy-tests', 'test-code');
+
+  $('download-contract').addEventListener('click', () => {
+    if (state.contractFilename) window.open(`/download/${state.contractFilename}`, '_blank');
+  });
+  $('download-tests').addEventListener('click', () => {
+    if (state.testFilename) window.open(`/download/${state.testFilename}`, '_blank');
+  });
+</script>
+</body>
+</html>

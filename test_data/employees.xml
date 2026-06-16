@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<employees>
+  <employee id="E001">
+    <name>Jane Doe</name>
+    <department>Engineering</department>
+    <salary>75000</salary>
+    <full_time>true</full_time>
+    <start_date>2023-06-01</start_date>
+  </employee>
+  <employee id="E002">
+    <name>John Smith</name>
+    <department>Marketing</department>
+    <salary>65000</salary>
+    <full_time>true</full_time>
+    <start_date>2024-01-15</start_date>
+  </employee>
+  <employee id="E003">
+    <name>Emily Davis</name>
+    <department>Engineering</department>
+    <salary>82000</salary>
+    <full_time>false</full_time>
+    <start_date>2024-09-01</start_date>
+  </employee>
+</employees>

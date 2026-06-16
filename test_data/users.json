@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "age": 30,
+    "is_active": true,
+    "score": 95.5,
+    "role": "admin",
+    "joined": "2024-01-15",
+    "address": {
+      "street": "123 Main St",
+      "city": "New York",
+      "zip": "10001"
+    },
+    "tags": ["python", "fastapi"]
+  },
+  {
+    "id": 2,
+    "name": "Bob Smith",
+    "email": "bob@example.com",
+    "age": 25,
+    "is_active": true,
+    "score": 87.2,
+    "role": "user",
+    "joined": "2024-03-20",
+    "address": {
+      "street": "456 Oak Ave",
+      "city": "Boston",
+      "zip": "02101"
+    },
+    "tags": ["javascript"]
+  },
+  {
+    "id": 3,
+    "name": "Charlie Brown",
+    "email": "charlie@example.com",
+    "age": 35,
+    "is_active": false,
+    "score": 76.0,
+    "role": "user",
+    "joined": "2023-11-01",
+    "address": null,
+    "tags": []
+  }
+]
