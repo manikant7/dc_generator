@@ -16,6 +16,7 @@
     --accent-hover: #79b8ff;
     --green: #3fb950;
     --red: #f85149;
+    --orange: #d29922;
     --code-bg: #0d1117;
     --radius: 8px;
   }
@@ -83,9 +84,11 @@
     display: flex;
     gap: 8px;
     align-items: stretch;
+    flex-wrap: wrap;
   }
-  .input-row input[type="text"] {
-    flex: 1;
+  .input-row > * { flex: 1; min-width: 200px; }
+
+  textarea, input[type="text"], input[type="number"] {
     background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -95,15 +98,18 @@
     font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
     outline: none;
     transition: border-color 0.15s;
+    width: 100%;
   }
-  .input-row input[type="text"]:focus { border-color: var(--accent); }
-  .input-row input[type="file"] {
-    flex: 1;
+  textarea:focus, input:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 120px; }
+
+  input[type="file"] {
+    width: 100%;
     color: var(--text-dim);
     font-size: 0.9rem;
     padding: 8px 0;
   }
-  .input-row input[type="file"]::file-selector-button {
+  input[type="file"]::file-selector-button {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -113,8 +119,16 @@
     cursor: pointer;
     font-size: 0.85rem;
   }
-  .input-row input[type="file"]::file-selector-button:hover {
-    background: var(--border);
+  input[type="file"]::file-selector-button:hover { background: var(--border); }
+  input[type="number"] { max-width: 100px; }
+
+  .inline-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
 
   .btn {
@@ -130,10 +144,7 @@
     transition: background 0.15s;
   }
   .btn:hover { background: var(--accent-hover); }
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .spinner {
     display: inline-block;
@@ -148,33 +159,53 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .result-header h3 { font-size: 1rem; font-weight: 600; }
+  .result-body { padding: 20px; }
+  .result-body.hidden { display: none; }
+
   .output-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   @media (max-width: 768px) {
     .output-grid { grid-template-columns: 1fr; }
-    .output-grid .card:last-child { margin-bottom: 0; }
   }
 
   .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
-  .panel-header h2 { margin: 0; }
+  .panel-header h4 { font-size: 0.85rem; color: var(--text-dim); font-weight: 500; }
 
   .btn-sm {
     background: var(--surface2);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
-    margin-left: 6px;
+    margin-left: 4px;
     transition: background 0.15s;
   }
   .btn-sm:hover { background: var(--border); }
@@ -183,21 +214,16 @@
     background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 14px;
     overflow-x: auto;
     font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     line-height: 1.5;
-    max-height: 500px;
+    max-height: 400px;
     overflow-y: auto;
     color: var(--text);
     tab-size: 4;
   }
-  .keyword { color: #ff7b72; }
-  .type { color: #79c0ff; }
-  .string { color: #a5d6ff; }
-  .comment { color: #8b949e; }
-  .func { color: #d2a8ff; }
 
   .chip {
     display: inline-block;
@@ -205,9 +231,8 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 2px 10px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-dim);
-    margin-top: 8px;
   }
   .chip strong { color: var(--text); }
 
@@ -223,82 +248,108 @@
   }
   .error-msg.visible { display: block; }
 
-  .hidden { display: none; }
+  .warning-msg {
+    background: rgba(210,153,34,0.1);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+  }
+
+  .hidden { display: none !important; }
 
   .badge {
     display: inline-block;
     background: var(--accent);
     color: #fff;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    padding: 1px 8px;
+    padding: 1px 7px;
     border-radius: 10px;
-    margin-left: 8px;
+    margin-left: 6px;
     vertical-align: middle;
   }
+  .badge-green { background: var(--green); }
+
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .expand-btn:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Data Contract Generator</h1>
-  <p class="subtitle">Upload or provide a path to JSON, XML, or CSV &rarr; get Pydantic v2 models + pytest tests</p>
+  <p class="subtitle">Provide data (path, upload, or paste) &rarr; get Pydantic v2 models + pytest tests</p>
 
   <div class="error-msg" id="error-msg"></div>
 
   <div class="card">
     <h2>Input</h2>
     <div class="tabs">
-      <button class="tab-btn active" data-tab="path">File Path</button>
+      <button class="tab-btn active" data-tab="path">File Paths</button>
       <button class="tab-btn" data-tab="upload">Upload</button>
+      <button class="tab-btn" data-tab="paste">Paste Data</button>
     </div>
 
     <div class="tab-content active" id="tab-path">
-      <div class="input-row">
-        <input type="text" id="file-path" placeholder="/path/to/data.json" spellcheck="false" />
-        <button class="btn" id="generate-btn">Generate</button>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:8px;">One file path per line</p>
+      <div class="input-row" style="flex-direction:column;">
+        <textarea id="file-paths" rows="3" placeholder="/path/to/users.json&#10;/path/to/employees.xml" spellcheck="false"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn" id="generate-paths-btn">Generate</button>
+          <span class="inline-label">
+            Max records: <input type="number" id="max-records-path" min="1" value="" placeholder="all" />
+          </span>
+        </div>
       </div>
     </div>
 
     <div class="tab-content" id="tab-upload">
-      <div class="input-row">
-        <input type="file" id="file-upload" />
-        <button class="btn" id="upload-btn">Upload &amp; Generate</button>
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:8px;">Select one or more files</p>
+      <div class="input-row" style="flex-direction:column;">
+        <input type="file" id="file-upload" multiple />
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn" id="upload-btn">Upload &amp; Generate</button>
+          <span class="inline-label">
+            Max records: <input type="number" id="max-records-upload" min="1" value="" placeholder="all" />
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-paste">
+      <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:8px;">Paste JSON, XML, or CSV content below</p>
+      <div class="input-row" style="flex-direction:column;">
+        <textarea id="raw-data" rows="6" placeholder='[{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]' spellcheck="false"></textarea>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="model-name" placeholder="Model name (e.g. User)" style="max-width:200px;flex:initial;" />
+          <select id="data-type" style="background:var(--code-bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:10px 14px;font-size:0.9rem;max-width:150px;">
+            <option value="">Auto-detect</option>
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+            <option value="csv">CSV</option>
+          </select>
+          <button class="btn" id="paste-btn">Generate</button>
+          <span class="inline-label">
+            Max records: <input type="number" id="max-records-paste" min="1" value="" placeholder="all" />
+          </span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="stats" class="hidden">
-    <div class="chip" id="stats-content"></div>
-  </div>
-
-  <div id="output" class="hidden">
-    <div class="output-grid">
-      <div class="card">
-        <div class="panel-header">
-          <h2>Contract <span class="badge">.py</span></h2>
-          <div>
-            <button class="btn-sm" id="copy-contract">Copy</button>
-            <button class="btn-sm" id="download-contract">Download</button>
-          </div>
-        </div>
-        <pre id="contract-code"></pre>
-      </div>
-      <div class="card">
-        <div class="panel-header">
-          <h2>Tests <span class="badge">.py</span></h2>
-          <div>
-            <button class="btn-sm" id="copy-tests">Copy</button>
-            <button class="btn-sm" id="download-tests">Download</button>
-          </div>
-        </div>
-        <pre id="test-code"></pre>
-      </div>
-    </div>
-  </div>
+  <div id="output-area" class="hidden"></div>
 </div>
 
 <script>
-  const state = { contractFilename: '', testFilename: '' };
+  const OUTPUT_DIR = '';
 
   function $(id) { return document.getElementById(id); }
 
@@ -315,8 +366,6 @@
     const el = $('error-msg');
     el.textContent = msg;
     el.classList.add('visible');
-    $('output').classList.add('hidden');
-    $('stats').classList.add('hidden');
   }
 
   function clearError() {
@@ -324,30 +373,79 @@
   }
 
   function setLoading(loading) {
-    ['generate-btn', 'upload-btn'].forEach(id => {
+    ['generate-paths-btn', 'upload-btn', 'paste-btn'].forEach(id => {
       const btn = $(id);
       if (loading) {
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span> Generating...';
       } else {
         btn.disabled = false;
-        btn.textContent = id === 'generate-btn' ? 'Generate' : 'Upload & Generate';
+        btn.textContent = id === 'generate-paths-btn' ? 'Generate' : id === 'upload-btn' ? 'Upload & Generate' : 'Generate';
       }
     });
   }
 
-  async function handleGenerate(filePath, file) {
+  function sanitizePath(p) { return p.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase(); }
+
+  function renderResults(data) {
+    const area = $('output-area');
+    area.classList.remove('hidden');
+    let html = '';
+
+    if (data.errors && data.errors.length > 0) {
+      html += '<div class="warning-msg"><strong>Errors:</strong><br>';
+      data.errors.forEach(e => { html += '&bull; ' + escapeHtml(e) + '<br>'; });
+      html += '</div>';
+    }
+
+    if (data.results && data.results.length > 0) {
+      data.results.forEach((r, idx) => {
+        const safeName = sanitizePath(r.class_name);
+        html += '<div class="result-card">';
+        html += '<div class="result-header">';
+        html += `<h3><span style="color:var(--accent)">${escapeHtml(r.class_name)}</span> <span class="badge">${escapeHtml(r.file_type.toUpperCase())}</span></h3>`;
+        html += `<div><span class="chip"><strong>${r.record_count}</strong> records</span>`;
+        html += ` <span class="chip">${escapeHtml(r.source_label)}</span></div>`;
+        html += '</div>';
+        html += '<div class="result-body">';
+        html += '<div class="output-grid">';
+        html += '<div><div class="panel-header"><h4>Contract <span class="badge badge-green">.py</span></h4>';
+        html += `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.contract_code)}">Copy</button>`;
+        html += ` <a href="/download/${safeName}/${escapeHtml(r.contract_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`;
+        html += `<pre>${escapeHtml(r.contract_code)}</pre></div>`;
+        html += '<div><div class="panel-header"><h4>Tests <span class="badge badge-green">.py</span></h4>';
+        html += `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.test_code)}">Copy</button>`;
+        html += ` <a href="/download/${safeName}/${escapeHtml(r.test_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`;
+        html += `<pre>${escapeHtml(r.test_code)}</pre></div>`;
+        html += '</div></div></div>';
+      });
+    } else if (!data.errors || data.errors.length === 0) {
+      html += '<div class="warning-msg">No results returned.</div>';
+    }
+
+    area.innerHTML = html;
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        navigator.clipboard.writeText(this.dataset.code).then(() => {
+          const orig = this.textContent;
+          this.textContent = 'Copied!';
+          setTimeout(() => { this.textContent = orig; }, 1500);
+        });
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function doGenerate(formData) {
     clearError();
     setLoading(true);
-    $('output').classList.add('hidden');
-    $('stats').classList.add('hidden');
-
-    const formData = new FormData();
-    if (file) {
-      formData.append('file', file);
-    } else {
-      formData.append('file_path', filePath);
-    }
+    $('output-area').classList.add('hidden');
 
     try {
       const resp = await fetch('/generate', { method: 'POST', body: formData });
@@ -358,17 +456,7 @@
         return;
       }
 
-      state.contractFilename = data.contract_filename;
-      state.testFilename = data.test_filename;
-
-      $('contract-code').textContent = data.contract_code;
-      $('test-code').textContent = data.test_code;
-      $('stats-content').innerHTML =
-        `<strong>${data.class_name}</strong> &middot; ${data.file_type.toUpperCase()} &middot; ${data.record_count} records &middot; ` +
-        `<a href="/download/${data.contract_filename}" style="color:var(--accent)">contract</a> &middot; ` +
-        `<a href="/download/${data.test_filename}" style="color:var(--accent)">tests</a>`;
-      $('stats').classList.remove('hidden');
-      $('output').classList.remove('hidden');
+      renderResults(data);
     } catch (err) {
       showError('Network error: ' + err.message);
     } finally {
@@ -376,40 +464,39 @@
     }
   }
 
-  $('generate-btn').addEventListener('click', () => {
-    const path = $('file-path').value.trim();
-    if (!path) { showError('Please enter a file path'); return; }
-    handleGenerate(path, null);
-  });
-
-  $('file-path').addEventListener('keydown', e => {
-    if (e.key === 'Enter') $('generate-btn').click();
+  $('generate-paths-btn').addEventListener('click', () => {
+    const paths = $('file-paths').value.trim();
+    if (!paths) { showError('Please enter at least one file path'); return; }
+    const maxR = $('max-records-path').value;
+    const fd = new FormData();
+    fd.append('file_paths', paths);
+    if (maxR) fd.append('max_records', maxR);
+    doGenerate(fd);
   });
 
   $('upload-btn').addEventListener('click', () => {
-    const file = $('file-upload').files[0];
-    if (!file) { showError('Please select a file to upload'); return; }
-    handleGenerate('', file);
+    const files = $('file-upload').files;
+    if (!files.length) { showError('Please select at least one file'); return; }
+    const maxR = $('max-records-upload').value;
+    const fd = new FormData();
+    for (const f of files) fd.append('files', f);
+    if (maxR) fd.append('max_records', maxR);
+    doGenerate(fd);
   });
 
-  function setupCopy(btnId, codeId) {
-    $(btnId).addEventListener('click', () => {
-      const text = $(codeId).textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = $(btnId).textContent;
-        $(btnId).textContent = 'Copied!';
-        setTimeout(() => { $(btnId).textContent = orig; }, 1500);
-      });
-    });
-  }
-  setupCopy('copy-contract', 'contract-code');
-  setupCopy('copy-tests', 'test-code');
-
-  $('download-contract').addEventListener('click', () => {
-    if (state.contractFilename) window.open(`/download/${state.contractFilename}`, '_blank');
-  });
-  $('download-tests').addEventListener('click', () => {
-    if (state.testFilename) window.open(`/download/${state.testFilename}`, '_blank');
+  $('paste-btn').addEventListener('click', () => {
+    const data = $('raw-data').value.trim();
+    const model = $('model-name').value.trim();
+    if (!data) { showError('Please paste some data'); return; }
+    if (!model) { showError('Please enter a model name'); return; }
+    const dataType = $('data-type').value;
+    const maxR = $('max-records-paste').value;
+    const fd = new FormData();
+    fd.append('raw_data', data);
+    fd.append('model_name', model);
+    if (dataType) fd.append('data_type', dataType);
+    if (maxR) fd.append('max_records', maxR);
+    doGenerate(fd);
   });
 </script>
 </body>

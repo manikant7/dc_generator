@@ -31,6 +31,13 @@ def detect_file_type(file_path: str) -> str:
 def _validate_content(path: Path, file_type: str) -> bool:
     try:
         content = path.read_bytes()
+        return _validate_bytes(content, file_type)
+    except Exception:
+        return False
+
+
+def _validate_bytes(content: bytes, file_type: str) -> bool:
+    try:
         if file_type == 'json':
             json.loads(content)
             return True
@@ -48,3 +55,11 @@ def _validate_content(path: Path, file_type: str) -> bool:
     except Exception:
         return False
     return False
+
+
+def detect_type_from_content(content: str) -> str:
+    data = content.encode('utf-8')
+    for file_type in SUPPORTED_TYPES:
+        if _validate_bytes(data, file_type):
+            return file_type
+    raise ValueError("Unable to detect data type from content")

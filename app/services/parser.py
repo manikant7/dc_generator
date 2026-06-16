@@ -19,8 +19,18 @@ def parse_file(file_path: str, file_type: str) -> list[dict]:
         raise ValueError(f"Unsupported file type: {file_type}")
 
 
-def _parse_json(path: Path) -> list[dict]:
-    data = json.loads(path.read_bytes())
+def parse_string(content: str, file_type: str) -> list[dict]:
+    if file_type == 'json':
+        return _parse_json_str(content)
+    elif file_type == 'xml':
+        return _parse_xml_str(content)
+    elif file_type == 'csv':
+        return _parse_csv_str(content)
+    else:
+        raise ValueError(f"Unsupported file type: {file_type}")
+
+
+def _normalize_json(data):
     if isinstance(data, list):
         return data
     elif isinstance(data, dict):
@@ -33,9 +43,23 @@ def _parse_json(path: Path) -> list[dict]:
         raise ValueError(f"JSON root must be object or array, got {type(data).__name__}")
 
 
+def _parse_json(path: Path) -> list[dict]:
+    return _normalize_json(json.loads(path.read_bytes()))
+
+
+def _parse_json_str(content: str) -> list[dict]:
+    return _normalize_json(json.loads(content))
+
+
 def _parse_xml(path: Path) -> list[dict]:
-    tree = ET.parse(path)
-    root = tree.getroot()
+    return _parse_xml_root(ET.parse(path).getroot())
+
+
+def _parse_xml_str(content: str) -> list[dict]:
+    return _parse_xml_root(ET.fromstring(content))
+
+
+def _parse_xml_root(root: ET.Element) -> list[dict]:
 
     records = _find_record_elements(root)
 
@@ -54,6 +78,9 @@ def _find_record_elements(root: ET.Element) -> list[ET.Element]:
     most_common_tag, count = tag_counts.most_common(1)[0]
 
     if count > 1 and count >= len(children) * 0.5:
+        return children
+
+    if len(children) == 1:
         return children
 
     deeper = []
@@ -105,8 +132,14 @@ def _xml_element_to_dict(element: ET.Element) -> dict:
 
 
 def _parse_csv(path: Path) -> list[dict]:
-    text = path.read_text(encoding='utf-8-sig')
+    return _parse_csv_text(path.read_text(encoding='utf-8-sig'))
 
+
+def _parse_csv_str(content: str) -> list[dict]:
+    return _parse_csv_text(content)
+
+
+def _parse_csv_text(text: str) -> list[dict]:
     try:
         sniffer = csv.Sniffer()
         dialect = sniffer.sniff(text[:4096])
