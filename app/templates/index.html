@@ -155,12 +155,62 @@
   .result-body { padding: 20px; }
   .result-body.hidden { display: none; }
 
-  .output-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  .split-container {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    position: relative;
   }
-  @media (max-width: 768px) { .output-grid { grid-template-columns: 1fr; } }
+  .split-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+  }
+  .split-panel:first-child { margin-right: 0; }
+  .split-panel:last-child { margin-left: 0; }
+
+  .split-divider {
+    width: 8px;
+    cursor: col-resize;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    background: transparent;
+    transition: background 0.15s;
+    margin: 0 4px;
+    border-radius: 4px;
+  }
+  .split-divider:hover,
+  .split-divider.active {
+    background: var(--accent);
+  }
+  .split-divider::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 32px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+  .split-divider:hover::after,
+  .split-divider.active::after {
+    background: var(--accent);
+  }
+
+  body.dragging {
+    cursor: col-resize;
+    user-select: none;
+  }
+  body.dragging .split-divider { background: var(--accent); }
+
+  @media (max-width: 768px) {
+    .split-container { flex-direction: column; }
+    .split-divider { display: none; }
+  }
 
   .panel-header {
     display: flex;
@@ -466,14 +516,16 @@
         html += `<div><span class="chip"><strong>${r.record_count}</strong> records</span>`;
         html += ` <span class="chip">${escapeHtml(r.source_label)}</span></div>`;
         html += '</div><div class="result-body">';
-        html += '<div class="output-grid">';
+        html += `<div class="split-container" data-split-id="split-${idx}">`;
 
-        html += '<div><div class="panel-header"><h4>Contract <span class="badge badge-green">.py</span></h4>'
+        html += '<div class="split-panel"><div class="panel-header"><h4>Contract <span class="badge badge-green">.py</span></h4>'
           + `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.contract_code)}">Copy</button>`
           + ` <a href="/download/${safeName}/${escapeHtml(r.contract_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`
           + buildCodePanel(r.contract_code, 'contract', idx) + '</div>';
 
-        html += '<div><div class="panel-header"><h4>Tests <span class="badge badge-green">.py</span></h4>'
+        html += `<div class="split-divider" data-split-id="split-${idx}"></div>`;
+
+        html += '<div class="split-panel"><div class="panel-header"><h4>Tests <span class="badge badge-green">.py</span></h4>'
           + `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.test_code)}">Copy</button>`
           + ` <a href="/download/${safeName}/${escapeHtml(r.test_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`
           + buildCodePanel(r.test_code, 'test', idx) + '</div>';
@@ -509,6 +561,57 @@
         if (gutter) gutter.classList.toggle('hidden', !this.checked);
       });
     });
+
+    initSplitters();
+  }
+
+  let splitDrag = null;
+
+  function initSplitters() {
+    document.querySelectorAll('.split-divider').forEach(div => {
+      div.removeEventListener('mousedown', onSplitDown);
+      div.addEventListener('mousedown', onSplitDown);
+    });
+  }
+
+  function onSplitDown(e) {
+    e.preventDefault();
+    const divider = e.currentTarget;
+    const container = divider.parentElement;
+    const left = container.children[0];
+    const right = container.children[2];
+    if (!left || !right) return;
+
+    const startX = e.clientX;
+    const startLeft = left.getBoundingClientRect().width;
+
+    splitDrag = { container, left, right, startX, startLeft };
+
+    document.body.classList.add('dragging');
+    document.addEventListener('mousemove', onSplitMove);
+    document.addEventListener('mouseup', onSplitUp);
+  }
+
+  function onSplitMove(e) {
+    if (!splitDrag) return;
+    const { container, left, right, startX, startLeft } = splitDrag;
+    const dx = e.clientX - startX;
+    const containerW = container.getBoundingClientRect().width;
+    if (containerW <= 0) return;
+
+    let leftRatio = (startLeft + dx) / containerW;
+    leftRatio = Math.max(0.2, Math.min(0.8, leftRatio));
+    const rightRatio = 1 - leftRatio;
+
+    left.style.flex = `${leftRatio} 1 0`;
+    right.style.flex = `${rightRatio} 1 0`;
+  }
+
+  function onSplitUp() {
+    splitDrag = null;
+    document.body.classList.remove('dragging');
+    document.removeEventListener('mousemove', onSplitMove);
+    document.removeEventListener('mouseup', onSplitUp);
   }
 
   async function doGenerate(formData) {
