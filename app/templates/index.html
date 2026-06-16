@@ -19,6 +19,7 @@
     --orange: #d29922;
     --code-bg: #0d1117;
     --radius: 8px;
+    --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -30,17 +31,9 @@
     min-height: 100vh;
   }
   .container { max-width: 1200px; margin: 0 auto; }
-  h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--accent);
-  }
-  .subtitle {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
-  }
+
+  h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
+  .subtitle { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 24px; }
 
   .card {
     background: var(--surface);
@@ -49,11 +42,7 @@
     padding: 24px;
     margin-bottom: 20px;
   }
-  .card h2 {
-    font-size: 1.1rem;
-    margin-bottom: 16px;
-    font-weight: 600;
-  }
+  .card h2 { font-size: 1.1rem; margin-bottom: 16px; font-weight: 600; }
 
   .tabs {
     display: flex;
@@ -73,19 +62,11 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  .input-row {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
+  .input-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
   .input-row > * { flex: 1; min-width: 200px; }
 
   textarea, input[type="text"], input[type="number"] {
@@ -95,7 +76,7 @@
     color: var(--text);
     padding: 10px 14px;
     font-size: 0.9rem;
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-family: var(--font-mono);
     outline: none;
     transition: border-color 0.15s;
     width: 100%;
@@ -103,12 +84,7 @@
   textarea:focus, input:focus { border-color: var(--accent); }
   textarea { resize: vertical; min-height: 120px; }
 
-  input[type="file"] {
-    width: 100%;
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    padding: 8px 0;
-  }
+  input[type="file"] { width: 100%; color: var(--text-dim); font-size: 0.9rem; padding: 8px 0; }
   input[type="file"]::file-selector-button {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -148,8 +124,7 @@
 
   .spinner {
     display: inline-block;
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
@@ -185,9 +160,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
-  @media (max-width: 768px) {
-    .output-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 768px) { .output-grid { grid-template-columns: 1fr; } }
 
   .panel-header {
     display: flex;
@@ -210,19 +183,86 @@
   }
   .btn-sm:hover { background: var(--border); }
 
-  pre {
-    background: var(--code-bg);
+  /* ===== Code Panel ===== */
+  .code-panel {
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px;
-    overflow-x: auto;
-    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    overflow: hidden;
+    resize: vertical;
+    min-height: 180px;
+    max-height: 700px;
+    background: var(--code-bg);
+  }
+  .code-panel::-webkit-resizer {
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent var(--border) var(--border) transparent;
+  }
+
+  .code-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .code-toolbar label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+  }
+  .code-toolbar label input { accent-color: var(--accent); }
+
+  .code-scroll {
+    display: flex;
+    overflow: auto;
+    flex: 1;
+  }
+
+  .code-gutter {
+    padding: 14px 0 14px 0;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--code-bg);
+  }
+  .code-gutter.hidden { display: none; }
+
+  .code-gutter .ln {
+    padding: 0 10px 0 8px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
     font-size: 0.78rem;
-    line-height: 1.5;
-    max-height: 400px;
-    overflow-y: auto;
+    line-height: 1.55;
+  }
+
+  .code-body {
+    padding: 14px 0 14px 0;
+    flex: 1;
+    min-width: 0;
+    background: var(--code-bg);
+  }
+  .code-body .cl {
+    padding: 0 14px;
     color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    white-space: pre;
     tab-size: 4;
+  }
+  .code-body.wrap .cl {
+    white-space: pre-wrap;
+    word-break: break-all;
   }
 
   .chip {
@@ -272,15 +312,6 @@
     vertical-align: middle;
   }
   .badge-green { background: var(--green); }
-
-  .expand-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    cursor: pointer;
-    font-size: 0.8rem;
-  }
-  .expand-btn:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -349,8 +380,6 @@
 </div>
 
 <script>
-  const OUTPUT_DIR = '';
-
   function $(id) { return document.getElementById(id); }
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -367,7 +396,6 @@
     el.textContent = msg;
     el.classList.add('visible');
   }
-
   function clearError() {
     $('error-msg').classList.remove('visible');
   }
@@ -386,6 +414,37 @@
   }
 
   function sanitizePath(p) { return p.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase(); }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function buildCodePanel(code, prefix, idx) {
+    const lines = code.split('\n');
+    const id = `${prefix}-${idx}`;
+    let gutterHtml = '';
+    let bodyHtml = '';
+    const maxDigits = String(lines.length).length;
+    lines.forEach((line, i) => {
+      const num = i + 1;
+      gutterHtml += `<div class="ln" style="min-width:${maxDigits}ch">${num}</div>`;
+      bodyHtml += `<div class="cl">${escapeHtml(line)}</div>`;
+    });
+
+    return `
+      <div class="code-panel">
+        <div class="code-toolbar">
+          <label><input type="checkbox" class="wrap-cb" data-target="${id}"> Wrap</label>
+          <label><input type="checkbox" class="line-cb" data-target="${id}" checked> Lines</label>
+        </div>
+        <div class="code-scroll">
+          <div class="code-gutter" id="gutter-${id}">${gutterHtml}</div>
+          <div class="code-body" id="body-${id}">${bodyHtml}</div>
+        </div>
+      </div>`;
+  }
 
   function renderResults(data) {
     const area = $('output-area');
@@ -406,17 +465,19 @@
         html += `<h3><span style="color:var(--accent)">${escapeHtml(r.class_name)}</span> <span class="badge">${escapeHtml(r.file_type.toUpperCase())}</span></h3>`;
         html += `<div><span class="chip"><strong>${r.record_count}</strong> records</span>`;
         html += ` <span class="chip">${escapeHtml(r.source_label)}</span></div>`;
-        html += '</div>';
-        html += '<div class="result-body">';
+        html += '</div><div class="result-body">';
         html += '<div class="output-grid">';
-        html += '<div><div class="panel-header"><h4>Contract <span class="badge badge-green">.py</span></h4>';
-        html += `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.contract_code)}">Copy</button>`;
-        html += ` <a href="/download/${safeName}/${escapeHtml(r.contract_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`;
-        html += `<pre>${escapeHtml(r.contract_code)}</pre></div>`;
-        html += '<div><div class="panel-header"><h4>Tests <span class="badge badge-green">.py</span></h4>';
-        html += `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.test_code)}">Copy</button>`;
-        html += ` <a href="/download/${safeName}/${escapeHtml(r.test_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`;
-        html += `<pre>${escapeHtml(r.test_code)}</pre></div>`;
+
+        html += '<div><div class="panel-header"><h4>Contract <span class="badge badge-green">.py</span></h4>'
+          + `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.contract_code)}">Copy</button>`
+          + ` <a href="/download/${safeName}/${escapeHtml(r.contract_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`
+          + buildCodePanel(r.contract_code, 'contract', idx) + '</div>';
+
+        html += '<div><div class="panel-header"><h4>Tests <span class="badge badge-green">.py</span></h4>'
+          + `<div><button class="btn-sm copy-btn" data-code="${escapeHtml(r.test_code)}">Copy</button>`
+          + ` <a href="/download/${safeName}/${escapeHtml(r.test_filename)}" class="btn-sm" style="text-decoration:none;display:inline-block;">Download</a></div></div>`
+          + buildCodePanel(r.test_code, 'test', idx) + '</div>';
+
         html += '</div></div></div>';
       });
     } else if (!data.errors || data.errors.length === 0) {
@@ -426,7 +487,7 @@
     area.innerHTML = html;
 
     document.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function () {
         navigator.clipboard.writeText(this.dataset.code).then(() => {
           const orig = this.textContent;
           this.textContent = 'Copied!';
@@ -434,28 +495,30 @@
         });
       });
     });
-  }
 
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    document.querySelectorAll('.wrap-cb').forEach(cb => {
+      cb.addEventListener('change', function () {
+        const body = document.getElementById('body-' + this.dataset.target);
+        if (body) body.classList.toggle('wrap', this.checked);
+      });
+    });
+
+    document.querySelectorAll('.line-cb').forEach(cb => {
+      cb.addEventListener('change', function () {
+        const gutter = document.getElementById('gutter-' + this.dataset.target);
+        if (gutter) gutter.classList.toggle('hidden', !this.checked);
+      });
+    });
   }
 
   async function doGenerate(formData) {
     clearError();
     setLoading(true);
     $('output-area').classList.add('hidden');
-
     try {
       const resp = await fetch('/generate', { method: 'POST', body: formData });
       const data = await resp.json();
-
-      if (!resp.ok) {
-        showError(data.detail || 'Unknown error');
-        return;
-      }
-
+      if (!resp.ok) { showError(data.detail || 'Unknown error'); return; }
       renderResults(data);
     } catch (err) {
       showError('Network error: ' + err.message);
